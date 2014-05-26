@@ -1,5 +1,8 @@
 <resources>
 
     <string name="app_name">OpenCarFinder</string>
+    <string name="park">PARK</string>
+    <string name="find">FIND</string>
+    <string name="parked">PARKED \u2713</string>
 
 </resources>
