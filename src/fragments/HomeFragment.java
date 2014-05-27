@@ -32,19 +32,36 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Loca
     private static final String LNG = "lng";
     private final Handler mHandler = new Handler();
     boolean parked = false;
-    private Runnable updatePark = new Runnable() {
+
+    private Runnable update = new Runnable() {
         @Override
         public void run() {
-
-            if (parked)
-                return;
-
             View v = getView();
+
+            //If car is parked, then change park button to inactive state.
+            if (parked) {
+                Button parkButton = (Button) v.findViewById(R.id.park_button);
+                parkButton.setBackgroundColor(Color.parseColor("#151515"));
+                parkButton.setText(R.string.park);
+                parkButton.postInvalidate();
+
+                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                settings.edit().remove(LAT).apply();
+                settings.edit().remove(LNG).apply();
+                parked = false;
+
+                return;
+            }
+
+
+            //Else, park button is in inactive state and changes to active
             Button parkButton = (Button) v.findViewById(R.id.park_button);
             parkButton.setBackgroundColor(Color.parseColor("#8CC63E"));
             parkButton.setText(R.string.parked);
             parkButton.postInvalidate();
             parked = true;
+
+            return;
 
         }
     };
@@ -62,6 +79,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Loca
         // default
         Criteria criteria = new Criteria();
         provider = locationManager.getBestProvider(criteria, false);
+        Location location = locationManager.getLastKnownLocation(provider);
+
 
     }
 
@@ -76,12 +95,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Loca
         v.findViewById(R.id.park_button).setOnClickListener(this);
         v.findViewById(R.id.find_button).setOnClickListener(this);
 
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
-
-        if (settings.contains(LAT) && settings.contains(LNG)) {
-            mHandler.post(this.updatePark);
-        }
-
         return v;
 
     }
@@ -90,16 +103,23 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Loca
     public void onActivityCreated(Bundle bundle) {
         Log.d(TAG, "onActivityCreated called");
         super.onActivityCreated(bundle);
+
+        //
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+
+        if (settings.contains(LAT) && settings.contains(LNG)) {
+            mHandler.post(this.update);
+        }
     }
 
-    /* Request updates at startup */
+    //Request updates at startup
     @Override
     public void onResume() {
         super.onResume();
-        locationManager.requestLocationUpdates(provider, 400, 1, this);
+        locationManager.requestLocationUpdates(provider, 60000, 3, this);
     }
 
-    /* Remove the locationlistener updates when Activity is paused */
+    //Remove the locationlistener updates when Activity is paused
     @Override
     public void onPause() {
         super.onPause();
@@ -109,11 +129,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Loca
     @Override
     public void onLocationChanged(Location location) {
 
-        if (null != location) {
+        if (null != location && !parked) {
+
+            //Update stored coordinates of parked car
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
             settings.edit().putLong(LAT, Double.doubleToLongBits(location.getLatitude())).apply();
             settings.edit().putLong(LNG, Double.doubleToLongBits(location.getLongitude())).apply();
-            mHandler.post(this.updatePark);
         }
 
     }
@@ -121,7 +142,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Loca
     @Override
     public void onProviderEnabled(String provider) {
         return;
-
     }
 
     @Override
@@ -138,25 +158,39 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Loca
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.find_button:
+
+                if (!parked)
+                    return;
+
                 this.getFragmentManager().beginTransaction().addToBackStack(null).add(R.id.frame_layout, new MapFragment()).hide(getFragmentManager().findFragmentByTag("HomeFragment")).commit();
                 break;
+
             case R.id.park_button:
 
-                if (parked)
+
+                if (parked) {
+                    mHandler.post(this.update);
+
+                    if (!parked)
+                        locationManager.requestLocationUpdates(provider, 60000, 3, this);
+                    else
+                        locationManager.removeUpdates(this);
                     break;
+                } else {
+                    if (!this.locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !this.locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                        this.showSettingsAlert();
+                        break;
+                    }
 
-                Location location = locationManager.getLastKnownLocation(provider);
 
-                if (null != location) {
+                    mHandler.post(this.update);
 
-                    mHandler.post(this.updatePark);
+                    if (!parked)
+                        locationManager.requestLocationUpdates(provider, 60000, 3, this);
+                    else
+                        locationManager.removeUpdates(this);
                     break;
-
                 }
-
-                showSettingsAlert();
-
-                break;
         }
     }
 

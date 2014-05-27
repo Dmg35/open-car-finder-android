@@ -4,8 +4,8 @@
     <string name="park">PARK</string>
     <string name="find">FIND</string>
     <string name="parked">PARKED \u2713</string>
-    <string name="map_find">FIND ME</string>
-    <string name="map_zoom_in">ZOOM IN</string>
-    <string name="map_zoom_out">ZOOM OUT</string>
+    <string name="zoom_me">ME</string>
+    <string name="zoom_car">CAR</string>
+    <string name="zoom_route">ROUTE</string>
 
 </resources>

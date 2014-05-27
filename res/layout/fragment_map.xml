@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:orientation="vertical"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
 
     <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="0dip"
-            android:layout_weight=".85">
+            android:layout_height="wrap_content">
 
         <org.osmdroid.views.MapView
                 android:id="@+id/mapview"
@@ -19,30 +18,29 @@
 
     <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="0dip"
-            android:layout_weight=".15">
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom">
 
         <Button
-                android:id="@+id/find_me"
-                android:layout_width="0dip"
+                android:id="@+id/zoom_me_button"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/map_find"
-                android:layout_weight=".3333"/>
+                android:text="@string/zoom_me"/>
 
         <Button
-                android:id="@+id/map_zoom_in"
+                android:id="@+id/zoom_car_button"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:text="@string/map_zoom_in"
-                android:layout_weight=".3333"/>
+                android:layout_weight=".3333"
+                android:text="@string/zoom_car"/>
 
         <Button
-                android:id="@+id/map_zoom_out"
+                android:id="@+id/zoom_route_button"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:text="@string/map_zoom_out"
+                android:text="@string/zoom_route"
                 android:layout_weight=".3333"/>
 
     </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>
